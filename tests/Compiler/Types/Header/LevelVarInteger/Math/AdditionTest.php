@@ -1,5 +1,5 @@
 <?php
-namespace App\Tests\CompilerByType\Script\LevelVarInteger\Math;
+namespace App\Tests\CompilerByType\Header\LevelVarInteger\Math;
 
 use App\Service\Archive\Glg;
 use App\Service\Archive\Mls;
@@ -14,6 +14,9 @@ class AdditionTest extends KernelTestCase
 
         $script = "
             scriptmain LevelScript;
+
+            entity
+                A01_Escape_Asylum : et_level;
 
             VAR
                 stealthTutSpotted : level_var integer;
@@ -67,21 +70,25 @@ class AdditionTest extends KernelTestCase
 
         ];
 
-        $compiler = new Compiler();
-        list($sectionCode, $sectionDATA) = $compiler->parse($script);
 
-        if ($sectionCode != $expected){
-            foreach ($sectionCode as $index => $item) {
+        $compiler = new Compiler();
+        $levelScriptCompiled = $compiler->parse(file_get_contents(__DIR__ . '/../0#levelscript.srce'));
+
+        $compiler = new Compiler();
+        $compiled = $compiler->parse($script, $levelScriptCompiled);
+
+        if ($compiled['CODE'] != $expected){
+            foreach ($compiled['CODE'] as $index => $item) {
                 if ($expected[$index] == $item){
                     echo ($index + 1) . '->' . $item . "\n";
                 }else{
-                    echo "MISSMATCH need " . $expected[$index] . " got " . $sectionCode[$index] . "\n";
+                    echo "MISSMATCH need " . $expected[$index] . " got " . $compiled['CODE'][$index] . "\n";
                 }
             }
             exit;
         }
 
-        $this->assertEquals($sectionCode, $expected, 'The bytecode is not correct');
+        $this->assertEquals($compiled['CODE'], $expected, 'The bytecode is not correct');
     }
 
 

@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Service\Archive\Fsb;
 use App\Service\Archive\Glg;
+use App\Service\Archive\Grf;
 use App\Service\Archive\Inst;
 use App\Service\Archive\Mls;
 use App\Service\BytecodeExplain;
@@ -29,14 +30,17 @@ class UnpackCommand extends Command
 
     /** @var Fsb  */
     private $fsb;
+    /** @var Grf  */
+    private $grf;
 
 
-    public function __construct(Mls $mls, Glg $glg, Inst $inst, Fsb $fsb)
+    public function __construct(Mls $mls, Glg $glg, Inst $inst, Fsb $fsb, Grf $grf)
     {
         $this->mls = $mls;
         $this->glg = $glg;
         $this->inst = $inst;
         $this->fsb = $fsb;
+        $this->grf = $grf;
 
         parent::__construct();
     }
@@ -90,6 +94,10 @@ class UnpackCommand extends Command
             exit;
         }
 
+        if (substr($contentAsHex, 0, 8) == "474e4941") { // GNIA
+            $this->grf->unpack($content);
+        }
+
         // we found a MLS scipt
         if (substr($contentAsHex, 0, 8) == "4d484c53" || substr($contentAsHex, 0, 8) == "4d485343") { // MHSC
             $output->writeln("MHLS (MLS) file detected");
@@ -102,7 +110,8 @@ class UnpackCommand extends Command
 
             $game = strtolower($helper->ask($input, $output, $question));
 
-            $outputTo = $folder . '/extracted/' . $filename . "." . $ext . "/";
+            $outputTo = $folder . '/extracted/' . $filename . "/";
+            @mkdir($outputTo);
 
 
             file_put_contents(

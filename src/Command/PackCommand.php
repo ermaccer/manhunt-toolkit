@@ -56,8 +56,9 @@ class PackCommand extends Command
 
         $helper = $this->getHelper('question');
 
-        $folder = $input->getArgument('folder');
+        $folder = realpath($input->getArgument('folder'));
         $saveTo = $input->getArgument('output');
+
 
         //MLS data folder
         if(is_dir(realpath($folder))){
@@ -72,7 +73,7 @@ class PackCommand extends Command
             $game = strtolower($helper->ask($input, $output, $question));
 
             if (is_null($saveTo)){
-                $saveTo = $folder.'-repacked';
+                $saveTo = $folder.'.mls';
             }
 
 
@@ -195,8 +196,8 @@ class PackCommand extends Command
          */
         $compressedMls = $this->mls->compress($mlsFile);
 
-        file_put_contents($saveTo, $compressedMls);
-        file_put_contents($saveTo . '.uncompressed', $mlsFile);
+        file_put_contents($saveTo, $mlsFile);
+        file_put_contents($saveTo . '.compressed', $compressedMls);
 
 
     }

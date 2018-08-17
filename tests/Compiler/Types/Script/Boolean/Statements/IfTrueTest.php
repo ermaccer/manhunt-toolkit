@@ -14,10 +14,13 @@ class IfTrueTest extends KernelTestCase
 
         $script = "
             scriptmain LevelScript;
+            
+            entity
+                A01_Escape_Asylum : et_level;
+            VAR
+            	lDebuggingFlag : Boolean;
 
             script OnCreate;
-                VAR
-	lDebuggingFlag : Boolean;
                 begin
                                     
                     if lDebuggingFlag = TRUE then
@@ -39,14 +42,10 @@ class IfTrueTest extends KernelTestCase
             '09000000',
 
 
-            '34000000', //reserve bytes
-            '09000000', //reserve bytes
-            '04000000', //Offset in byte
-
             '14000000', //Read VAR from header
             '01000000', //Read VAR from header
             '04000000', //Read VAR from header
-            '04000000', //Offset
+            '00000000', //Offset
             '10000000', //nested call return result
             '01000000', //nested call return result
             '12000000', //parameter (temp int)
@@ -61,7 +60,7 @@ class IfTrueTest extends KernelTestCase
             '01000000', //statement (core)
             '01000000', //statement (core)
             '3f000000', //statement (init start offset)
-            '78000000', //Offset (line number 1424)
+            '6c000000', //Offset (line number 1424)
             '33000000', //statement (compare mode INT/FLOAT)
             '01000000', //statement (compare mode INT/FLOAT)
             '01000000', //statement (compare mode INT/FLOAT)
@@ -69,8 +68,9 @@ class IfTrueTest extends KernelTestCase
             '01000000', //statement (end sequence)
             '00000000', //statement (end sequence)
             '3f000000', //statement (init start offset)
-            '90000000', //Offset (line number 1430)
+            '84000000', //Offset (line number 1430)
             'e7000000', //KillThisScript Call
+
 
             // script end
             '11000000',
@@ -83,21 +83,20 @@ class IfTrueTest extends KernelTestCase
         ];
 
         $compiler = new Compiler();
-        list($sectionCode, $sectionDATA) = $compiler->parse($script);
+        $compiled = $compiler->parse($script);
 
-
-        if ($sectionCode != $expected){
-            foreach ($sectionCode as $index => $item) {
+        if ($compiled['CODE'] != $expected){
+            foreach ($compiled['CODE'] as $index => $item) {
                 if ($expected[$index] == $item){
                     echo ($index + 1) . '->' . $item . "\n";
                 }else{
-                    echo "MISSMATCH need " . $expected[$index] . " got " . $sectionCode[$index] . "\n";
+                    echo "MISSMATCH need " . $expected[$index] . " got " . $compiled['CODE'][$index] . "\n";
                 }
             }
             exit;
         }
 
-        $this->assertEquals($sectionCode, $expected, 'The bytecode is not correct');
+        $this->assertEquals($compiled['CODE'], $expected, 'The bytecode is not correct');
     }
 
 }

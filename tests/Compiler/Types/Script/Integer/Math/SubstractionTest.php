@@ -15,11 +15,15 @@ class SubstractionTest extends KernelTestCase
 
         $script = "
             scriptmain LevelScript;
+                        
+            entity
+                A01_Escape_Asylum : et_level;
+
             script OnCreate;
                 VAR
-                    openCount : integer;
+                	animLength : integer;
                 begin
-                    openCount := openCount - 1;
+                	animLength := animLength - 1500;
                 end;
             end.
 
@@ -48,7 +52,7 @@ class SubstractionTest extends KernelTestCase
             '01000000', //nested call return result
             '12000000', //parameter (temp int)
             '01000000', //parameter (temp int)
-            '01000000', //value 1
+            'dc050000', //value 1
             '0f000000', //parameter (temp int)
             '04000000', //parameter (temp int)
 
@@ -79,20 +83,19 @@ class SubstractionTest extends KernelTestCase
         ];
 
         $compiler = new Compiler();
-        list($sectionCode, $sectionDATA) = $compiler->parse($script);
+        $compiled = $compiler->parse($script);
 
-        if ($sectionCode != $expected){
-            foreach ($sectionCode as $index => $item) {
+        if ($compiled['CODE'] != $expected){
+            foreach ($compiled['CODE'] as $index => $item) {
                 if ($expected[$index] == $item){
                     echo ($index + 1) . '->' . $item . "\n";
                 }else{
-                    echo "MISSMATCH need " . $expected[$index] . " got " . $sectionCode[$index] . "\n";
+                    echo "MISSMATCH need " . $expected[$index] . " got " . $compiled['CODE'][$index] . "\n";
                 }
             }
             exit;
         }
 
-        $this->assertEquals($sectionCode, $expected, 'The bytecode is not correct');
+        $this->assertEquals($compiled['CODE'], $expected, 'The bytecode is not correct');
     }
-
 }
